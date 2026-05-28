@@ -91,7 +91,7 @@ def main(page: ft.Page):
     )
 
     sku_input = ft.TextField(label="SKU", height=46, width=130)
-    name_input = ft.TextField(label="Producto", height=46, expand=True)
+    name_input = ft.TextField(label="Producto", height=46, )
     category_input = ft.TextField(label="Categoria", height=46, width=150)
     stock_input = ft.TextField(label="Stock", height=46, width=100, keyboard_type=ft.KeyboardType.NUMBER)
     min_stock_input = ft.TextField(label="Minimo", height=46, width=100, keyboard_type=ft.KeyboardType.NUMBER)
@@ -99,7 +99,7 @@ def main(page: ft.Page):
     price_input = ft.TextField(label="Precio", height=46, width=110, keyboard_type=ft.KeyboardType.NUMBER)
     supplier_input = ft.TextField(label="Proveedor", height=46, width=180)
 
-    supplier_name_input = ft.TextField(label="Proveedor", height=46, expand=True)
+    supplier_name_input = ft.TextField(label="Proveedor", height=46)
     supplier_contact_input = ft.TextField(label="Contacto", height=46, width=180)
     supplier_phone_input = ft.TextField(label="Telefono", height=46, width=170)
 
@@ -297,7 +297,7 @@ def main(page: ft.Page):
                             ft.Row(
                                 spacing=6,
                                 controls=[
-                                    ft.IconButton(icon=ft.Icons.ADD, icon_color="#5eead4", tooltip="Reponer 10", on_click=lambda e, sku=item["sku"]: restock_product(sku, 10)),
+                                    ft.IconButton(icon=ft.Icons.ADD, icon_color="#5eead4", tooltip="Reponer 1", on_click=lambda e, sku=item["sku"]: restock_product(sku, 1)),#boton para agregar la cantidad que se quiere agregar de stock
                                     ft.IconButton(icon=ft.Icons.REMOVE, icon_color="#fbbf24", tooltip="Ajustar -1", on_click=lambda e, sku=item["sku"]: reduce_stock(sku, 1)),
                                 ],
                             )
@@ -523,7 +523,7 @@ def main(page: ft.Page):
                     spacing=14,
                     controls=[
                         ft.Text("Gestion de inventario", size=18, weight=ft.FontWeight.BOLD, color="#f8fafc"),
-                        ft.Text("Usa + para reponer 10 unidades y - para ajustar stock manualmente.", color="#94a3b8", size=13),
+                        ft.Text("Usa + para reponer 1 unidades y - para ajustar stock manualmente.", color="#94a3b8", size=13),
                         ft.Column(scroll=ft.ScrollMode.AUTO, controls=[make_inventory_table()]),
                     ],
                 )
