@@ -1,7 +1,9 @@
 import flet as ft
-
-
+import database 
+    
 def main(page: ft.Page):
+    database.crear_tablas()
+
     page.title = "Sistema de Ventas e Inventario"
     page.theme_mode = ft.ThemeMode.DARK
     page.window_width = 1280
@@ -11,19 +13,9 @@ def main(page: ft.Page):
 
     current_section = {"name": "Resumen"}
 
-    products = [
-        {"sku": "CAF-001", "name": "Cafe molido premium", "category": "Almacen", "stock": 48, "min_stock": 12, "cost": 2400, "price": 3900, "supplier": "Distribuidora Norte", "sold_today": 9},
-        {"sku": "YER-014", "name": "Yerba organica 1kg", "category": "Almacen", "stock": 8, "min_stock": 15, "cost": 1900, "price": 3200, "supplier": "Campo Verde", "sold_today": 14},
-        {"sku": "ACE-022", "name": "Aceite de oliva 500ml", "category": "Gourmet", "stock": 21, "min_stock": 10, "cost": 4100, "price": 6900, "supplier": "Sabores del Sur", "sold_today": 5},
-        {"sku": "LIM-105", "name": "Detergente concentrado", "category": "Limpieza", "stock": 6, "min_stock": 10, "cost": 900, "price": 1600, "supplier": "LimpioMax", "sold_today": 11},
-    ]
+    products = database.obtener_productos()
 
-    suppliers = [
-        {"name": "Distribuidora Norte", "contact": "Laura Perez", "phone": "+54 11 4321-1000", "status": "Activo"},
-        {"name": "Campo Verde", "contact": "Martin Ruiz", "phone": "+54 341 555-8021", "status": "Reponer"},
-        {"name": "Sabores del Sur", "contact": "Ana Gomez", "phone": "+54 299 441-0920", "status": "Activo"},
-        {"name": "LimpioMax", "contact": "Sofia Diaz", "phone": "+54 351 210-7000", "status": "Activo"},
-    ]
+    suppliers = database.obtener_proveedores()
 
     def money(value):
         return f"${value:,.0f}".replace(",", ".")
@@ -157,10 +149,12 @@ def main(page: ft.Page):
         refresh_view()
 
     def restock_product(sku, qty=10):
-        item = find_product(sku)
-        if item is None:
-            return
-        item["stock"] += qty
+        
+        database.actualizar_stock(sku, qty)
+
+        products.clear()
+        products.extend(database.obtener_productos())
+
         show_message(f"Stock actualizado: +{qty} unidades de {item['name']}.")
         refresh_view()
 
@@ -176,12 +170,12 @@ def main(page: ft.Page):
         refresh_view()
 
     def delete_product(sku):
-        item = find_product(sku)
-        if item is None:
-            return
-        products.remove(item)
-        show_message(f"Producto eliminado: {item['name']}.")
+        database.eliminar_producto(sku)
+        products.clear()
+        products.extend(database.obtener_productos())
+        show_message("Producto eliminado.")
         refresh_view()
+        
 
     def toggle_supplier_status(name):
         supplier = next((item for item in suppliers if item["name"] == name), None)
@@ -231,7 +225,12 @@ def main(page: ft.Page):
         except ValueError:
             show_message("Stock, minimo, costo y precio deben ser numeros.")
             return
-        products.append(new_product)
+        database.agregar_producto(new_product)
+        products.clear()
+        products.extend(database.obtener_productos())
+        show_message("Producto agregado correctamente.")
+        refresh_view()
+        products = database.obtener_productos()
         if not any(item["name"].lower() == new_product["supplier"].lower() for item in suppliers):
             suppliers.append({"name": new_product["supplier"], "contact": "Sin asignar", "phone": "-", "status": "Activo"})
         clear_product_inputs()
