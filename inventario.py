@@ -1,6 +1,7 @@
 import flet as ft
 import database 
-    
+
+
 def main(page: ft.Page):
     database.crear_tablas()
 
@@ -143,19 +144,26 @@ def main(page: ft.Page):
         if item["stock"] < qty:
             show_message(f"No hay stock suficiente para vender {item['name']}.")
             return
-        item["stock"] -= qty
-        item["sold_today"] += qty
-        show_message(f"Venta registrada: {qty} x {item['name']}.")
-        refresh_view()
+        def sell_product(sku, qty=1):
+            nonlocal products
+            database.vender_producto(sku)
+
+            products.clear()
+            products.extend(database.obtener_productos())
+            show_message("Venta registrada.")
+
+            refresh_view()
+            show_message(f"Venta registrada: {qty} x {item['name']}.")
+            refresh_view()
 
     def restock_product(sku, qty=10):
-        
+        nonlocal products
         database.actualizar_stock(sku, qty)
 
         products.clear()
         products.extend(database.obtener_productos())
 
-        show_message(f"Stock actualizado: +{qty} unidades de {item['name']}.")
+        show_message(f"Stock actualizado: +{qty} unidades.")
         refresh_view()
 
     def reduce_stock(sku, qty=1):
@@ -170,6 +178,7 @@ def main(page: ft.Page):
         refresh_view()
 
     def delete_product(sku):
+        nonlocal products
         database.eliminar_producto(sku)
         products.clear()
         products.extend(database.obtener_productos())
@@ -202,15 +211,28 @@ def main(page: ft.Page):
             control.value = ""
 
     def add_product(_):
-        required = [sku_input, name_input, category_input, stock_input, min_stock_input, cost_input, price_input, supplier_input]
+        nonlocal products
+        required = [
+            sku_input,
+            name_input,
+            category_input,
+            stock_input,
+            min_stock_input,
+            cost_input,
+            price_input,
+            supplier_input,
+        ]
+
         if any(not control.value for control in required):
             show_message("Completa todos los campos del producto.")
             return
+
+        sku = sku_input.value.strip().upper()
+        if find_product(sku):
+            show_message("Ya existe un producto con ese SKU.")
+            return
+
         try:
-            sku = sku_input.value.strip().upper()
-            if find_product(sku):
-                show_message("Ya existe un producto con ese SKU.")
-                return
             new_product = {
                 "sku": sku,
                 "name": name_input.value.strip(),
@@ -225,16 +247,26 @@ def main(page: ft.Page):
         except ValueError:
             show_message("Stock, minimo, costo y precio deben ser numeros.")
             return
+
         database.agregar_producto(new_product)
         products.clear()
         products.extend(database.obtener_productos())
-        show_message("Producto agregado correctamente.")
-        refresh_view()
-        products = database.obtener_productos()
-        if not any(item["name"].lower() == new_product["supplier"].lower() for item in suppliers):
-            suppliers.append({"name": new_product["supplier"], "contact": "Sin asignar", "phone": "-", "status": "Activo"})
+
+        if not any(
+            item["name"].lower() == new_product["supplier"].lower()
+            for item in suppliers
+        ):
+            suppliers.append({
+                "name": new_product["supplier"],
+                "contact": "Sin asignar",
+                "phone": "-",
+                "status": "Activo"
+            })
+
         clear_product_inputs()
+
         show_message("Producto agregado correctamente.")
+
         refresh_view()
 
     def add_supplier(_):
