@@ -1,6 +1,6 @@
 import flet as ft
 import database 
-
+#pestaña ventas
 
 def main(page: ft.Page):
     database.crear_tablas()
@@ -264,9 +264,7 @@ def main(page: ft.Page):
             })
 
         clear_product_inputs()
-
         show_message("Producto agregado correctamente.")
-
         refresh_view()
 
     def add_supplier(_):

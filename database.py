@@ -7,32 +7,36 @@ def conectar():
 def crear_tablas():
     con = conectar()
     cur = con.cursor()
-
+#direccion
+#contacto-email
+#not null
     cur.execute("""
     CREATE TABLE IF NOT EXISTS proveedores(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT UNIQUE,
+        nombre_prov TEXT UNIQUE,
         contacto TEXT,
         telefono TEXT,
-        estado TEXT
+        estado TEXT,
+        direccion TEXT
     )
     """)
-
+#borrar sku
+#fk nombre_prov
     cur.execute("""
     CREATE TABLE IF NOT EXISTS productos(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sku TEXT UNIQUE,
+        sku TEXT UNIQUE, 
         nombre TEXT,
         categoria TEXT,
         stock INTEGER,
         stock_minimo INTEGER,
         costo REAL,
         precio REAL,
-        proveedor TEXT,
+        FOREIGN KEY(nombre_prov) REFERENCES proveedores(nombre_prov) ,
         vendidos INTEGER DEFAULT 0
     )
     """)
-
+#tabla productos
     cur.execute("""
     CREATE TABLE IF NOT EXISTS ventas(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
